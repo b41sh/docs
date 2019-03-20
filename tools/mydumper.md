@@ -10,7 +10,7 @@ category: tools
 
 `mydumper` is a fork of the [mydumper](https://github.com/maxbube/mydumper) project with additional functionality specific to TiDB. It is the recommended method to use for logical backups of TiDB.
 
-[Download the Binary](http://download.pingcap.org/tidb-enterprise-tools-latest-linux-amd64.tar.gz).
+It can be [downloaded](../tools/download.md) as part of the Enterprise Tools package.
 
 ## What enhancements does this contain over regular mydumper?
 
@@ -25,6 +25,13 @@ category: tools
                        Default: The current TSO (UniqueID from SHOW MASTER STATUS).
                        Accepts either a TSO or valid datetime.  For example: -z "2016-10-08 16:45:26"
 ```
+
+### Required privileges
+
+- SELECT
+- RELOAD
+- LOCK TABLES
+- REPLICATION CLIENT
 
 ### Usage example
 

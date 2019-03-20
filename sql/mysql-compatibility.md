@@ -35,6 +35,9 @@ However, in TiDB, the following MySQL features are not supported for the time be
 + `CREATE TABLE tblName AS SELECT stmt` syntax
 + `CREATE TEMPORARY TABLE` syntax
 + `XA` syntax (TiDB uses a two-phase commit internally, but this is not exposed via an SQL interface)
++ `LOCK TABLE` syntax (TiDB uses `tidb_snapshot` to [produce backups](../tools/mydumper.md))
++ `CHECK TABLE` syntax
++ `CHECKSUM TABLE` syntax
 
 ## Features that are different from MySQL
 
@@ -89,7 +92,7 @@ TiDB implements the asynchronous schema changes algorithm in F1. The Data Manipu
     
         > **Note:** The changing/modifying column operation cannot make the length of the original type become shorter and it cannot change the unsigned/charset/collate attributes of the column.
 
-    - Supports changing the following type definitions: default value, comment, null, not null and OnUpdate, but does not support changing from null to not null.
+    - Supports changing the following type definitions: `default value`, `comment`, `null`, `not null` and `OnUpdate`.
     - Supports parsing the `LOCK [=] {DEFAULT|NONE|SHARED|EXCLUSIVE}` syntax, but there is no actual operation.
 
 + Truncate Table
@@ -175,10 +178,9 @@ Architecturally, TiDB does support a similar storage engine abstraction to MySQL
 
 TiDB supports **all of the SQL modes** from MySQL 5.7 with minor exceptions:
 
-1. The `ALLOW_INVALID_DATES` mode is not yet supported. See [TiDB #8263](https://github.com/pingcap/tidb/issues/8263).
-2. The compatibility modes deprecated in MySQL 5.7 and removed in MySQL 8.0 are not supported (such as `ORACLE`, `POSTGRESQL` etc).
-3. The mode `ONLY_FULL_GROUP_BY` has minor [semantic differences](../sql/aggregate-group-by-functions.md#differences-from-mysql) to MySQL 5.7, which we plan to address in the future.
-4. The SQL modes `NO_DIR_IN_CREATE` and `NO_ENGINE_SUBSTITUTION` are supported for compatibility, but are not applicable to TiDB. 
+- The compatibility modes deprecated in MySQL 5.7 and removed in MySQL 8.0 are not supported (such as `ORACLE`, `POSTGRESQL` etc).
+- The mode `ONLY_FULL_GROUP_BY` has minor [semantic differences](../sql/aggregate-group-by-functions.md#differences-from-mysql) to MySQL 5.7, which we plan to address in the future.
+- The SQL modes `NO_DIR_IN_CREATE` and `NO_ENGINE_SUBSTITUTION` are supported for compatibility, but are not applicable to TiDB. 
 
 ### EXPLAIN
 
@@ -199,3 +201,9 @@ The output of the query execution plan returned from the `EXPLAIN` command diffe
         - On Linux: 0
         - On Windows: 1
         - On macOS: 2
+- Default value of `explicit_defaults_for_timestamp`:
+    - The default value in TiDB is `ON` and currently TiDB only supports `ON`.
+    - The default value in MySQL:
+        - For MySQL 5.7: `OFF`
+        - For MySQL 8.0: `ON`
+    

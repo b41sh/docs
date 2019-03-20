@@ -52,7 +52,7 @@ To use the Raw Key-Value API in applications developed by golang, take the follo
     func (c *RawKVClient) Delete(key []byte) error
     func (c *RawKVClient) Get(key []byte) ([]byte, error)
     func (c *RawKVClient) Put(key, value []byte) error
-    func (c *RawKVClient) Scan(startKey []byte, limit int) (keys [][]byte, values [][]byte, err error)
+    func (c *RawKVClient) Scan(startKey, endKey []byte, limit int) (keys [][]byte, values [][]byte, err error)
     ```
 
 ### Usage example of the Raw Key-Value API
@@ -202,7 +202,7 @@ import (
     "github.com/juju/errors"
     "github.com/pingcap/tidb/kv"
     "github.com/pingcap/tidb/store/tikv"
-    "github.com/pingcap/tidb/terror"
+    "github.com/pingcap/parser/terror"
 
     goctx "golang.org/x/net/context"
 )

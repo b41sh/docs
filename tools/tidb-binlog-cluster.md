@@ -53,7 +53,7 @@ The server hardware requirements for development, testing, and the production en
 
 * You need to use TiDB v2.0.8-binlog, v2.1.0-rc.5 or the later version. Otherwise, the TiDB cluster is not compatible with the cluster version of TiDB-Binlog.
 * When TiDB is running, you need to guarantee that at least one Pump is running normally.
-* To enable TiDB-Binlog, add the `enable-binlog` startup parameter to TiDB.
+* To enable the TiDB-Binlog service, add the `enable-binlog` startup parameter in TiDB. Make sure that the TiDB-Binlog service is enabled in all TiDB instances in a same cluster, otherwise the upstream and downstream data inconsistency might occur during data synchronization. If you want to temporarily run a TiDB instance where the TiDB-Binlog service is not enabled, configure `run_ddl= false` in the TiDB configuration file.
 * Drainer does not support the `rename` DDL operation on the table of `ignore schemas` (the schemas in the filter list).
 * If you want to start Drainer in the existing TiDB cluster, generally, you need to make a full backup of the cluster data, obtain `savepoint`, import the data to the target database, and then start Drainer to synchronize the incremental data from `savepoint`.
 * Drainer supports synchronizing binlogs to MySQL, TiDB, Kafka or the local files. If you need to synchronize binlogs to other destinations, you can set Drainer to synchronize the binlog to Kafka and read the data in Kafka for customization processing. See [Binlog Slave Client User Guide](../tools/binlog-slave-client.md).
@@ -142,9 +142,39 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
         pump3 ansible_host=172.16.10.74 deploy_dir=/data1/pump
         ```
 
-2. Deploy and start the TiDB cluster.
+2. Deploy and start the TiDB cluster containing Pump.
 
-    For how to use Ansible to deploy the TiDB cluster, see [Deploy TiDB Using Ansible](../op-guide/ansible-deployment.md). When Binlog is enabled, Pump is deployed and started by default.
+    After configuring the `inventory.ini` file, you can choose one method from below to deploy the TiDB cluster.
+
+    **Method #1**: Add Pump on the existing TiDB cluster.
+
+    1. Deploy `pump_servers` and `node_exporters`.
+
+        ```
+        ansible-playbook deploy.yml -l ${pump1_ip}, ${pump2_ip}, [${alias1_name}, ${alias2_name}]
+        ```
+
+    2. Start `pump_servers`.
+
+        ```
+        ansible-playbook start.yml --tags=pump
+        ```
+
+    3. Update and restart `tidb_servers`.
+
+        ```
+        ansible-playbook rolling_update.yml --tags=tidb
+        ```
+
+    4. Update the monitoring data.
+
+        ```
+        ansible-playbook rolling_update_monitor.yml --tags=prometheus
+        ```
+
+    **Method #2**: Deploy a TiDB cluster containing Pump from scratch.
+
+    For how to use Ansible to deploy the TiDB cluster, see [Deploy TiDB Using Ansible](../op-guide/ansible-deployment.md).
 
 3. Check the Pump status.
 
@@ -153,9 +183,10 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
     ```bash
     $ cd /home/tidb/tidb-ansible
     $ resources/bin/binlogctl -pd-urls=http://172.16.10.72:2379 -cmd pumps
-    2018/09/21 16:45:54 nodes.go:46: [info] pump: &{NodeID:ip-172-16-10-72:8250 Addr:172.16.10.72:8250 State:online IsAlive:false Score:0 Label:<nil> MaxCommitTS:0 UpdateTS:403051525690884099}
-    2018/09/21 16:45:54 nodes.go:46: [info] pump: &{NodeID:ip-172-16-10-73:8250 Addr:172.16.10.73:8250 State:online IsAlive:false Score:0 Label:<nil> MaxCommitTS:0 UpdateTS:403051525703991299}
-    2018/09/21 16:45:54 nodes.go:46: [info] pump: &{NodeID:ip-172-16-10-74:8250 Addr:172.16.10.74:8250 State:online IsAlive:false Score:0 Label:<nil> MaxCommitTS:0 UpdateTS:403051525717360643}
+    
+    INFO[0000] pump: {NodeID: ip-172-16-10-72:8250, Addr: 172.16.10.72:8250, State: online, MaxCommitTS: 403051525690884099, UpdateTime: 2018-12-25 14:23:37 +0800 CST}
+    INFO[0000] pump: {NodeID: ip-172-16-10-73:8250, Addr: 172.16.10.73:8250, State: online, MaxCommitTS: 403051525703991299, UpdateTime: 2018-12-25 14:23:36 +0800 CST}
+    INFO[0000] pump: {NodeID: ip-172-16-10-74:8250, Addr: 172.16.10.74:8250, State: online, MaxCommitTS: 403051525717360643, UpdateTime: 2018-12-25 14:23:35 +0800 CST}
     ```
 
 #### Step 3: Deploy Drainer
@@ -173,11 +204,9 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
     2018/06/21 11:24:47 meta.go:117: [info] meta: &{CommitTS:400962745252184065}
     ```
 
-    After this command is executed, a file named `{data-dir}/savepoint` is generated. This file contains `tso`, whose value is used as the value of the `initial-commit-ts` parameter needed for the initial start of Drainer.
+    This command outputs `meta: &{CommitTS:400962745252184065}`, and the value of `CommitTS` is used as the value of the `initial-commit-ts` parameter needed for the initial start of Drainer.
 
 2. Back up and restore all the data.
-
-    If the downstream is MySQL/TiDB, to guarantee the data integrity, you need to make a full backup and restore of the data before Drainer starts (about 10 minutes after Pump starts to run).
 
     It is recommended to use [mydumper](../tools/mydumper.md) to make a full backup of TiDB and then use [Loader](../tools/loader.md) to export the data to the downstream. For more details, see [Backup and Restore](../op-guide/backup-restore.md).
 
@@ -250,7 +279,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
         [syncer.to]
         compression = ""
         # default data directory: "{{ deploy_dir }}/data.drainer"
-        # dir = "data.drainer"
+        dir = "data.drainer"
         ```
 
 5. Deploy Drainer.
@@ -500,11 +529,11 @@ The following part shows how to use Pump and Drainer based on the nodes above.
         # kafka-version = "0.8.2.0"
         ```
 
-    - The example of starting Pump:  
+    - The example of starting Drainer:
 
         > **Note:** If the downstream is MySQL/TiDB, to guarantee the data integrity, you need to obtain the `initial-commit-ts` value and make a full backup of the data and restore the data before the initial start of Drainer. For details, see [Deploy Drainer](#step-3-deploy-drainer).
 
-        When Pump is started for the first time, use the `initial-commit-ts` parameter.
+        When Drainer is started for the first time, use the `initial-commit-ts` parameter.
 
         ```bash
         ./bin/drainer -config drainer.toml -initial-commit-ts {initial-commit-ts}
@@ -591,28 +620,34 @@ Command example:
 
 - Check the state of all the Pumps or Drainers:
 
+    Set `cmd` as `pumps` or `drainers` to check the state of all the Pumps or Drainers. For example,
+
     ```bash
-    bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd pumps/drainers
+    bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd pumps
 
-    2018/12/18 03:17:09 nodes.go:46: [info] pump: &{NodeID:1.1.1.1:8250 Addr:pump:8250 State:online IsAlive:false Score:0 Label:<nil> MaxCommitTS:405039487358599169 UpdateTS:405027205608112129}
+    INFO[0000] pump: {NodeID: ip-172-16-30-67:8250, Addr: 172.16.30.192:8250, State: online, MaxCommitTS: 405197570529820673, UpdateTime: 2018-12-25 14:23:37 +0800 CST}
     ```
-
-    > **Note:** Currently, the `IsAlive`, `Score` and `Label` fields are not used, so you do not need to pay attention to them.
 
 - Modify the Pump/Drainer state:
 
-    ```bash
-    The Pump/Drainer states include `online`, `pausing`, `paused`, `closing` and `offline`. 
+    Set `cmd` as `update-pump` or `update-drainer` to modify the state of Pump or Drainer, which can be `online`, `pausing`, `paused`, `closing` or `offline`. 
 
-    bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd update-pump/update-drainer -node-id ip-127-0-0-1:8250/{nodeID} -state {state}
+    ```bash
+    bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd update-pump -node-id ip-127-0-0-1:8250 -state paused
     ```
 
     This command modifies the Pump/Drainer state saved in PD.
 
 - Pause or close Pump/Drainer:
 
+    - Set `cmd` as `pause-pump` or `pause-drainer` to pause Pump or Drainer. 
+
+    - Set `cmd` as `offline-pump` or `offline-drainer` to close Pump or Drainer. 
+    
+    For example, 
+
     ```bash
-    bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd pause-pump/pause-drainer/offline-pump/offline-drainer -node-id ip-127-0-0-1:8250/{nodeID}
+    bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd pause-pump -node-id ip-127-0-0-1:8250
     ```
 
     `binlogctl` sends the HTTP request to Pump/Drainer, and Pump/Drainer exits from the process after receiving the command and sets its state to `paused`/`offline`.
