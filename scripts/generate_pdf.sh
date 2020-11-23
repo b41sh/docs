@@ -16,14 +16,14 @@ _version_tag="$(date '+%Y%m%d')"
 # used to debug template setting error
 
 pandoc -N --toc --smart --latex-engine=xelatex \
-    --template=templates/template.tex \
-    --columns=80 \
-    --listings \
-    -V title="TiDB Documentation" \
-    -V author="PingCAP Inc." \
-    -V date="${_version_tag}" \
-    -V CJKmainfont="${MAINFONT}" \
-    -V fontsize=12pt \
-    -V geometry:margin=1in \
-    -V include-after="\\input{templates/copyright.tex}" \
-    doc.md -s -o output.pdf
+--template=templates/template.tex \
+--columns=80 \
+--listings \
+-V title="TiDB Documentation" \
+-V author="PingCAP Inc." \
+-V date="${_version_tag}" \
+-V CJKmainfont="${MAINFONT}" \
+-V fontsize=12pt \
+-V geometry:margin=1in \
+-V include-after="\\input{templates/copyright.tex}" \
+"doc.md" -s -o "output.pdf"

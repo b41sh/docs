@@ -4,14 +4,13 @@
 # Generate all-in-one Markdown file for ``doc-cn``
 # Tip: 不支持中文文件名
 # readme.md 中的目录引用的md多次（或者md的sub heading)，以第一次出现为主
+# 每个版本都会生成一个自己的 PDF
 
 from __future__ import print_function, unicode_literals
 
 import re
 import os
 
-
-entry_file = "TOC.md"
 followups = []
 in_toc = False
 contents = []
@@ -22,6 +21,9 @@ image_link_pattern = re.compile(r'!\[(.*?)\]\((.*?)\)')
 level_pattern = re.compile(r'(\s*[\-\+]+)\s')
 # match all headings
 heading_patthern = re.compile(r'(^#+|\n#+)\s')
+
+
+entry_file = "TOC.md"
 
 # stage 1, parse toc
 with open(entry_file) as fp:
@@ -46,14 +48,17 @@ with open(entry_file) as fp:
             if matches:
                 for match in matches:
                     fpath = match[2]
-                    if fpath.endswith('.md'):
+                    if fpath.startswith('http'):
+                        ## remove list format character `- `, `+ `
+                        followups.append(('TOC', level, line.strip()[2:]))
+                    elif fpath.endswith('.md'):
+                        # remove first slash from the fpath
+                        fpath = fpath[1:]
+                        print('fpath, ',fpath)
                         key = ('FILE', level, fpath)
                         if key not in followups:
                             print(key)
                             followups.append(key)
-                    elif fpath.startswith('http'):
-                        ## remove list format character `- `, `+ `
-                        followups.append(('TOC', level, line.strip()[2:]))
             else:
                 name = line.strip().split(None, 1)[-1]
                 key = ('TOC', level, name)
@@ -79,8 +84,8 @@ for tp, lv, f in followups:
     try:
         for line in open(f).readlines():
             if line.startswith("#"):
-                 tag = line.strip()
-                 break
+                tag = line.strip()
+                break
     except Exception as e:
         print(e)
         tag = ""
@@ -111,10 +116,13 @@ def replace_link_wrap(chapter, name):
                     if _rel_path == fpath:
                         frag = '#' + file_link_name[fpath]
             return '[%s](%s)' % (link_name, frag)
-        elif link.endswith('.png'):
+        elif link.endswith('.png') or link.endswith('.jpeg') or link.endswith('.svg') or link.endswith('.gif') or link.endswith('.jpg'):
             # special handing for pic
-            fname = os.path.basename(link)
-            return '[%s](./media/%s)' % (link_name, fname)
+            img_link = re.sub(r'[\.\/]*media\/', './media/', link, count=0, flags=0)
+            # print('****************', img_link)
+            # print('================', '[%s](%s)' % (link_name, img_link))
+            # return '[%s](%s/%s)' % (link_name, dirname, fname)
+            return '[%s](%s)' % (link_name, img_link)
         else:
             return full
 
@@ -151,7 +159,7 @@ for type_, level, name in followups:
             with open(name) as fp:
                 chapter = fp.read()
                 chapter = replace_link_wrap(chapter, name)
-                chapter = image_link_pattern.sub(replace_img_link, chapter)
+                # chapter = image_link_pattern.sub(replace_img_link, chapter)
 
                 # fix heading level
                 diff_level = level - heading_patthern.findall(chapter)[0].count('#')
@@ -165,5 +173,7 @@ for type_, level, name in followups:
             print("generate file error: ignore!")
 
 # stage 4, generage final doc.md
-with open("doc.md", 'w') as fp:
+target_doc_file = 'doc.md'
+with open(target_doc_file, 'w') as fp:
     fp.write('\n'.join(contents))
+    contents = []

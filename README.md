@@ -1,35 +1,36 @@
-# TiDB Introduction
+# TiDB Documentation
 
-TiDB (The pronunciation is: /'taɪdiːbi:/ tai-D-B, etymology: titanium) is an open-source distributed scalable Hybrid Transactional and Analytical Processing (HTAP) database. It features horizontal scalability, strong consistency, and high availability. TiDB is MySQL compatible and serves as a one-stop data warehouse for both OLTP (Online Transactional Processing) and OLAP (Online Analytical Processing) workloads.
+Welcome to TiDB documentation!
 
-- __Horizontal scalability__
+This repository stores all the source files of [TiDB Docs at the PingCAP website](https://docs.pingcap.com/tidb/v4.0), while the [pingcap/docs-cn](https://github.com/pingcap/docs-cn) repository stores all the source files of [TiDB Documentation in Chinese](https://docs.pingcap.com/zh/tidb/v4.0).
 
-    TiDB provides horizontal scalability simply by adding new nodes. Never worry about infrastructure capacity ever again.
+If you find documentation issues, feel free to [create an Issue](https://github.com/pingcap/docs/issues/new/choose) to let us know or directly [create a Pull Request](/CONTRIBUTING.md#how-to-contribute) to help fix or update it.
 
-- __MySQL compatibility__
+Currently, the official documentation supports two languages:
 
-    Easily replace MySQL with TiDB to power your applications without changing a single line of code [in most cases](https://www.pingcap.com/docs/sql/mysql-compatibility/) and still benefit from the MySQL ecosystem.
+- `en`: [documentation in English](https://docs.pingcap.com/tidb/stable)
+- `zh`: [documentation in Chinese](https://docs.pingcap.com/zh/tidb/stable)
 
-- __Distributed transaction__
+You can use Google Translate to view the documentation in different languages. For example:
 
-    TiDB is your source of truth, guaranteeing ACID compliance, so your data is accurate and reliable anytime, anywhere.
+- `fr`: [documentation in French](http://translate.google.com/translate?hl=en&sl=en&tl=fr&u=https%3A%2F%2Fgithub.com%2Fpingcap%2Fdocs%2Fblob%2Fmaster%2FTOC.md)
+- `ja`: [documentation in Japanese](http://translate.google.com/translate?hl=en&sl=en&tl=ja&u=https%3A%2F%2Fgithub.com%2Fpingcap%2Fdocs%2Fblob%2Fmaster%2FTOC.md)
+- `ko`: [documentation in Korean](http://translate.google.com/translate?hl=en&sl=en&tl=ko&u=https%3A%2F%2Fgithub.com%2Fpingcap%2Fdocs%2Fblob%2Fmaster%2FTOC.md)
 
-- __Cloud Native__
+## Documentation versions
 
-    TiDB is designed to work in the cloud -- public, private, or hybrid -- making deployment, provisioning, and maintenance drop-dead simple.
+Currently, we maintain the following versions of TiDB documentation in different branches:
 
-- __Minimize ETL__
+| Branch name | TiDB docs version |
+| :---------|:----------|
+| [`master`](https://github.com/pingcap/docs/tree/master) | The latest development version |
+| [`release-4.0`](https://github.com/pingcap/docs/tree/release-4.0) | 4.0 stable version |
+| [`release-3.1`](https://github.com/pingcap/docs/tree/release-3.1) | 3.1 stable version |
+| [`release-3.0`](https://github.com/pingcap/docs/tree/release-3.0) | 3.0 stable version |
+| [`release-2.1`](https://github.com/pingcap/docs/tree/release-2.1) | 2.1 stable version |
 
-    ETL (Extract, Transform and Load) is no longer necessary with TiDB's hybrid OLTP/OLAP architecture, enabling you to create new values for your users, easier and faster.
+## Contributing
 
-- __High availability__
+[<img src="media/contribution-map.png" alt="contribution-map" width="180"></img>](https://github.com/pingcap/community/tree/master/special-interest-groups/sig-docs)
 
-    With TiDB, your data and applications are always on and continuously available, so your users are never disappointed.
-
-TiDB is designed to support both OLTP and OLAP scenarios. For complex OLAP scenarios, use [TiSpark](tispark/tispark-user-guide.md).
-
-Read the following three articles to understand TiDB techniques:
-
-- [Data Storage](https://pingcap.github.io/blog/2017/07/11/tidbinternal1/)
-- [Computing](https://pingcap.github.io/blog/2017/07/11/tidbinternal2/)
-- [Scheduling](https://pingcap.github.io/blog/2017/07/20/tidbinternal3/)
+See [TiDB Documentation Contributing Guide](/CONTRIBUTING.md) to become a contributor! 🤓

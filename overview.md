@@ -1,41 +1,49 @@
 ---
 title: TiDB Introduction
-summary: An introduction to the TiDB database platform
-category: introduction
+summary: Learn about the key features and usage scenarios of TiDB.
+aliases: ['/docs/dev/key-features/','/tidb/dev/key-features','/docs/dev/overview/']
 ---
 
 # TiDB Introduction
 
-TiDB (The pronunciation is: /'taɪdiːbi:/ tai-D-B, etymology: titanium) is an open-source distributed scalable Hybrid Transactional and Analytical Processing (HTAP) database. It features horizontal scalability, strong consistency, and high availability. TiDB is MySQL compatible and serves as a one-stop data warehouse for both OLTP (Online Transactional Processing) and OLAP (Online Analytical Processing) workloads.
+[TiDB](https://github.com/pingcap/tidb) (/’taɪdiːbi:/, "Ti" stands for Titanium) is an open-source NewSQL database that supports Hybrid Transactional and Analytical Processing (HTAP) workloads. It is MySQL compatible and features horizontal scalability, strong consistency, and high availability. The goal of TiDB is to provide users with a one-stop database solution that covers OLTP (Online Transactional Processing), OLAP (Online Analytical Processing), and HTAP services. TiDB is suitable for various use cases that require high availability and strong consistency with large-scale data.
 
-- __Horizontal scalability__
+## Key features
 
-    TiDB provides horizontal scalability simply by adding new nodes. Never worry about infrastructure capacity ever again.
+- **Horizontally scaling out or scaling in easily**
 
-- __MySQL compatibility__
+    The TiDB architecture design of separating computing from storage enables you to separately scale out or scale in the computing or storage capacity online as needed. The scaling process is transparent to application operations and maintenance staff.
 
-    Easily replace MySQL with TiDB to power your applications without changing a single line of code [in most cases](https://www.pingcap.com/docs/sql/mysql-compatibility/) and still benefit from the MySQL ecosystem.
+- **Financial-grade high availability**
 
-- __Distributed transaction__
+    The data is stored in multiple replicas. Data replicas obtain the transaction log using the Multi-Raft protocol. A transaction can be committed only when data has been successfully written into the majority of replicas. This can guarantee strong consistency, and availability when a minority of replicas go down. To meet the requirements of different disaster tolerance levels, you can configure the geographic location and number of replicas as needed.
 
-    TiDB is your source of truth, guaranteeing ACID compliance, so your data is accurate and reliable anytime, anywhere.
+- **Real-time HTAP**
 
-- __Cloud Native__
+    TiDB provides two storage engines: [TiKV](https://tikv.org/), a row-based storage engine, and [TiFlash](/tiflash/tiflash-overview.md), a columnar storage engine. TiFlash uses the Multi-Raft Learner protocol to replicate data from TiKV in real time, ensuring that the data between the TiKV row-based storage engine and the TiFlash columnar storage engine are consistent. TiKV and TiFlash can be deployed on different machines as needed to solve the problem of HTAP resource isolation.
 
-    TiDB is designed to work in the cloud -- public, private, or hybrid -- making deployment, provisioning, and maintenance drop-dead simple.
+- **Cloud-native distributed database**
 
-- __Minimize ETL__
+    TiDB is a distributed database designed for the cloud, providing flexible scalability, reliability and security on the cloud platform. Users can elastically scale TiDB to meet the requirements of their changing workloads. In TiDB, each piece of data has 3 replicas at least, which can be scheduled in different cloud availability zones to tolerate the outage of a whole data center. [TiDB Operator](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/tidb-operator-overview) helps manage TiDB on Kubernetes and automates tasks related to operating the TiDB cluster, which makes TiDB easier to deploy on any cloud that provides managed Kubernetes. [TiDB Cloud](https://pingcap.com/products/tidbcloud) (Beta), the fully-managed TiDB service, is the easiest, most economical, and most resilient way to unlock the full power of [TiDB in the cloud](https://docs.pingcap.com/tidbcloud/beta), allowing you to deploy and run TiDB clusters with just a few clicks.
 
-    ETL (Extract, Transform and Load) is no longer necessary with TiDB's hybrid OLTP/OLAP architecture, enabling you to create new values for your users, easier and faster.
+- **Compatible with the MySQL 5.7 protocol and MySQL ecosystem**
 
-- __High availability__
+    TiDB is compatible with the MySQL 5.7 protocol, common features of MySQL, and the MySQL ecosystem. To migrate your applications to TiDB, you do not need to change a single line of code in many cases or only need to modify a small amount of code. In addition, TiDB provides a series of [data migration tools](/migration-overview.md) to help migrate application data easily into TiDB.
 
-    With TiDB, your data and applications are always on and continuously available, so your users are never disappointed.
+## Use cases
 
-TiDB is designed to support both OLTP and OLAP scenarios. For complex OLAP scenarios, use [TiSpark](tispark/tispark-user-guide.md).
+- **Financial industry scenarios with high requirements for data consistency, reliability, availability, scalability, and disaster tolerance**
 
-Read the following three articles to understand TiDB techniques:
+    As we all know, the financial industry has high requirements for data consistency, reliability, availability, scalability, and disaster tolerance. The traditional solution is to provide services in two data centers in the same city, and provide data disaster recovery but no services in a third data center located in another city. This solution has the disadvantages of low resource utilization, high maintenance cost, and the fact that RTO (Recovery Time Objective) and RPO (Recovery Point Objective) cannot meet expectations. TiDB uses multiple replicas and the Multi-Raft protocol to schedule data to different data centers, racks, and machines. When some machines fail, the system can automatically switch to ensure that the system RTO ≦ 30s and RPO = 0.
 
-- [Data Storage](https://pingcap.github.io/blog/2017/07/11/tidbinternal1/)
-- [Computing](https://pingcap.github.io/blog/2017/07/11/tidbinternal2/)
-- [Scheduling](https://pingcap.github.io/blog/2017/07/20/tidbinternal3/)
+- **Massive data and high concurrency scenarios with high requirements for storage capacity, scalability, and concurrency**
+
+    As applications grow rapidly, the data surges. Traditional standalone databases cannot meet the data capacity requirements. The solution is to use sharding middleware or a NewSQL database (like TiDB), and the latter is more cost-effective. TiDB adopts a separate computing and storage architecture, which enables you to scale out or scale in the computing or storage capacity separately. The computing layer supports a maximum of 512 nodes, each node supports a maximum of 1,000 concurrencies, and the maximum cluster capacity is at the PB (petabytes) level.
+
+- **Real-time HTAP scenarios**
+
+    With the fast growth of 5G, Internet of Things, and artificial intelligence, the data generated by a company keeps increasing tremendously, reaching a scale of hundreds of TB (terabytes) or even the PB level. The traditional solution is to process online transactional applications using an OLTP database and use an ETL (Extract, Transform, Load) tool to replicate the data into an OLAP database for data analysis. This solution has multiple disadvantages such as high storage costs and poor real-time performance. TiDB introduces the TiFlash columnar storage engine in v4.0, which combines with the TiKV row-based storage engine to build TiDB as a true HTAP database. With a small amount of extra storage cost, you can handle both online transactional processing and real-time data analysis in the same system, which greatly saves the cost.
+
+- **Data aggregation and secondary processing scenarios**
+
+    The application data of most companies are scattered in different systems. As the application grows, the decision-making leaders need to understand the business status of the entire company to make decisions in time. In this case, the company needs to aggregate the scattered data into the same system and execute secondary processing to generate a T+0 or T+1 report. The traditional solution is to use ETL and Hadoop, but the Hadoop system is complicated, with high operations and maintenance cost and storage cost. Compared with Hadoop, TiDB is much simpler. You can replicate data into TiDB using ETL tools or data migration tools provided by TiDB. Reports can be directly generated using SQL statements.

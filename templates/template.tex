@@ -76,13 +76,14 @@ $if(listings)$
     frame=single,
     showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
     showstringspaces=false,          % underline spaces within strings only
+    columns=flexible,
     breaklines=true,
     postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{gray}\hookrightarrow\space}}
 }
 
 $endif$
 $if(lhs)$
-\lstnewenvironment{code}{\lstset{language=Haskell,basicstyle=\small\ttfamily}}{}
+\lstnewenvironment{code}{\lstset{columns=flexible,breaklines=true,language=Haskell,basicstyle=\small\ttfamily}}{}
 $endif$
 $if(highlighting-macros)$
 $highlighting-macros$
@@ -187,7 +188,7 @@ $endfor$
 \renewcommand\figurename{Figure}
 
 % fix overlap toc number and title
-% http://blog.csdn.net/golden1314521/article/details/39926135
+% https://blog.csdn.net/golden1314521/article/details/39926135
 \usepackage{titlesec}
 \usepackage{titletoc}
 % \titlecontents{标题名}[左间距]{标题格式}{标题标志}{无序号标题}{指引线与页码}[下间距]
