@@ -1,12 +1,16 @@
 ---
 title: Deploy a TiDB Cluster Offline Using TiUP
 summary: Introduce how to deploy a TiDB cluster offline using TiUP.
-aliases: ['/docs/dev/production-offline-deployment-using-tiup/']
+aliases: ['/docs/dev/production-offline-deployment-using-tiup/','/docs/dev/offline-deployment-using-ansible/','/docs/dev/how-to/deploy/orchestrated/offline-ansible/','/tidb/dev/offline-deployment-using-ansible/']
 ---
 
 # Deploy a TiDB Cluster Offline Using TiUP
 
 This document describes how to deploy a TiDB cluster offline using TiUP.
+
+> **Note:**
+>
+> Since TiDB v4.0, PingCAP no longer provides support for TiDB Ansible. Since TiDB v5.0, PingCAP no longer provides TiDB Ansible documents. If you want to read the document that introduces how to deploy a TiDB cluster using TiDB Ansible offline, see [Deploy TiDB Offline Using TiDB Ansible](https://docs.pingcap.com/tidb/v4.0/offline-deployment-using-ansible).
 
 ## Step 1: Prepare the TiUP offline component package
 
@@ -80,7 +84,7 @@ source /home/tidb/.bash_profile
 
 The `local_install.sh` script automatically executes the `tiup mirror set tidb-community-server-${version}-linux-amd64` command to set the current mirror address to `tidb-community-server-${version}-linux-amd64`.
 
-To switch the mirror to another directory, you can manually execute the `tiup mirror set <mirror-dir>` command.
+To switch the mirror to another directory, you can manually execute the `tiup mirror set <mirror-dir>` command. To switch the mirror to the online environment, you can execute the `tiup mirror set https://tiup-mirrors.pingcap.com` command.
 
 ## Step 3: Mount the TiKV data disk
 
